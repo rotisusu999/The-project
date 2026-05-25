@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Demo CRUD — Data Anggota</title>
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" rel="stylesheet">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --border: rgba(0,0,0,0.1);
+    --border-strong: rgba(0,0,0,0.2);
+    --text: #1a1a1a;
+    --text-muted: #6b6b6b;
+    --accent: #2563eb;
+    --accent-light: #eff6ff;
+    --danger: #dc2626;
+    --danger-light: #fef2f2;
+    --success: #16a34a;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2rem 1rem;
+  }
+
+  .container { max-width: 900px; margin: 0 auto; }
+
+  header {
+    margin-bottom: 2rem;
+  }
+  header h1 {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+  }
+  header p {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .card-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 1.25rem;
+  }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .full { grid-column: 1 / -1; }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  label { font-size: 13px; font-weight: 500; color: var(--text-muted); }
+
+  input, select, textarea {
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 9px 12px;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+    background: #fff;
+  }
+  textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+
+  .radio-group { display: flex; gap: 12px; margin-top: 2px; }
+  .radio-label {
+    display: flex; align-items: center; gap: 7px;
+    font-size: 14px; color: var(--text); cursor: pointer;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 8px 14px;
+    transition: all 0.15s; flex: 1; justify-content: center;
+  }
+  .radio-label input { display: none; }
+  .radio-label.active {
+    background: var(--accent-light);
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .btn-row { display: flex; gap: 10px; margin-top: 1.25rem; }
+  .btn-primary {
+    background: var(--accent); color: #fff;
+    border: none; border-radius: var(--radius-sm);
+    padding: 9px 20px; font-size: 14px; font-weight: 500;
+    cursor: pointer; font-family: inherit;
+    display: flex; align-items: center; gap: 6px;
+    transition: opacity 0.15s;
+  }
+  .btn-primary:hover { opacity: 0.88; }
+  .btn-secondary {
+    background: none; color: var(--text-muted);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 9px 16px; font-size: 14px; font-family: inherit;
+    cursor: pointer; transition: background 0.15s;
+  }
+  .btn-secondary:hover { background: var(--bg); }
+
+  .err { color: var(--danger); font-size: 13px; margin-top: 10px; display: none; }
+
+  .table-header {
+    display: flex; align-items: center;
+    justify-content: space-between; margin-bottom: 1rem;
+  }
+  .table-header h2 { font-size: 16px; font-weight: 600; }
+  .badge {
+    font-size: 12px; padding: 3px 10px;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 99px; color: var(--text-muted); font-weight: 500;
+  }
+
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead tr { border-bottom: 1px solid var(--border); }
+  th {
+    text-align: left; padding: 8px 10px;
+    color: var(--text-muted); font-weight: 600;
+    font-size: 12px; text-transform: uppercase;
+    letter-spacing: 0.4px; white-space: nowrap;
+  }
+  td {
+    padding: 10px 10px; border-bottom: 0.5px solid var(--border);
+    vertical-align: middle;
+  }
+  tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: var(--bg); }
+
+  .avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--accent-light); color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600; flex-shrink: 0;
+  }
+  .name-cell { display: flex; align-items: center; gap: 9px; }
+  .name-text { font-weight: 500; }
+
+  .gender-badge {
+    font-size: 11px; padding: 3px 9px;
+    border-radius: 99px; font-weight: 600;
+  }
+  .laki { background: #eff6ff; color: #1d4ed8; }
+  .perempuan { background: #fdf2f8; color: #9d174d; }
+
+  .motivasi {
+    max-width: 200px; font-style: italic;
+    color: var(--text-muted); line-height: 1.5;
+    white-space: normal;
+  }
+
+  .btn-del {
+    background: none; border: none;
+    color: var(--text-muted); cursor: pointer;
+    padding: 5px 7px; border-radius: 6px;
+    font-size: 15px; transition: all 0.15s;
+    display: flex; align-items: center;
+  }
+  .btn-del:hover { background: var(--danger-light); color: var(--danger); }
+
+  .empty-state {
+    text-align: center; padding: 2.5rem 1rem;
+    color: var(--text-muted); font-size: 14px;
+  }
+  .empty-state i { font-size: 32px; display: block; margin-bottom: 10px; opacity: 0.4; }
+
+  @media (max-width: 600px) {
+    .grid { grid-template-columns: 1fr; }
+    .full { grid-column: 1; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1><i class="ti ti-database" style="vertical-align:-3px;margin-right:6px"></i>Demo CRUD — Data Anggota</h1>
+    <p>Tambah, lihat, dan hapus data anggota secara interaktif</p>
+  </header>
+
+  <div class="card">
+    <div class="card-title">Form Input Data</div>
+    <div class="grid">
+      <div class="field">
+        <label>Nama Lengkap</label>
+        <input type="text" id="f-nama" placeholder="contoh: Budi Santoso">
+      </div>
+      <div class="field">
+        <label>Tanggal Lahir</label>
+        <input type="date" id="f-tgl">
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="f-email" placeholder="email@contoh.com">
+      </div>
+      <div class="field">
+        <label>Gender</label>
+        <div class="radio-group">
+          <label class="radio-label" id="lbl-laki" onclick="setGender('Laki-laki')">
+            <input type="radio" name="gender" value="Laki-laki">
+            <i class="ti ti-user"></i> Laki-laki
+          </label>
+          <label class="radio-label" id="lbl-perempuan" onclick="setGender('Perempuan')">
+            <input type="radio" name="gender" value="Perempuan">
+            <i class="ti ti-user"></i> Perempuan
+          </label>
+        </div>
+      </div>
+      <div class="field full">
+        <label>Kata-kata Motivasi</label>
+        <textarea id="f-motivasi" placeholder="Tulis kata motivasi kamu di sini..."></textarea>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-primary" onclick="addRow()">
+        <i class="ti ti-plus"></i> Tambah Data
+      </button>
+      <button class="btn-secondary" onclick="resetForm()">Reset</button>
+    </div>
+    <p class="err" id="err-msg"></p>
+  </div>
+
+  <div class="card">
+    <div class="table-header">
+      <h2>Data Tersimpan</h2>
+      <span class="badge" id="count-badge">0 entri</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Nama</th>
+            <th>Tgl Lahir</th>
+            <th>Umur</th>
+            <th>Email</th>
+            <th>Gender</th>
+            <th>Motivasi</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tbl-body">
+          <tr>
+            <td colspan="8">
+              <div class="empty-state">
+                <i class="ti ti-inbox"></i>
+                Belum ada data. Tambahkan dulu!
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  let data = [];
+  let selectedGender = '';
+
+  function setGender(val) {
+    selectedGender = val;
+    document.getElementById('lbl-laki').classList.toggle('active', val === 'Laki-laki');
+    document.getElementById('lbl-perempuan').classList.toggle('active', val === 'Perempuan');
+  }
+
+  function calcAge(dob) {
+    const b = new Date(dob), n = new Date();
+    let a = n.getFullYear() - b.getFullYear();
+    if (n < new Date(n.getFullYear(), b.getMonth(), b.getDate())) a--;
+    return a;
+  }
+
+  function initials(name) {
+    return name.trim().split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+  }
+
+  function fmtDate(d) {
+    const [y, m, dd] = d.split('-');
+    return `${dd}/${m}/${y}`;
+  }
+
+  function showErr(msg) {
+    const e = document.getElementById('err-msg');
+    e.textContent = msg;
+    e.style.display = msg ? 'block' : 'none';
+  }
+
+  function resetForm() {
+    ['f-nama', 'f-email', 'f-motivasi'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('f-tgl').value = '';
+    selectedGender = '';
+    document.getElementById('lbl-laki').classList.remove('active');
+    document.getElementById('lbl-perempuan').classList.remove('active');
+    showErr('');
+  }
+
+  function addRow() {
+    const nama = document.getElementById('f-nama').value.trim();
+    const tgl = document.getElementById('f-tgl').value;
+    const email = document.getElementById('f-email').value.trim();
+    const motivasi = document.getElementById('f-motivasi').value.trim();
+
+    if (!nama) { showErr('Nama tidak boleh kosong.'); return; }
+    if (!tgl) { showErr('Tanggal lahir wajib diisi.'); return; }
+    if (!email || !email.includes('@')) { showErr('Email tidak valid.'); return; }
+    if (!selectedGender) { showErr('Pilih gender dulu.'); return; }
+    if (!motivasi) { showErr('Kata motivasi tidak boleh kosong.'); return; }
+
+    showErr('');
+    data.push({ id: Date.now(), nama, tgl, email, gender: selectedGender, motivasi });
+    renderTable();
+    resetForm();
+  }
+
+  function deleteRow(id) {
+    if (confirm('Hapus data ini?')) {
+      data = data.filter(d => d.id !== id);
+      renderTable();
+    }
+  }
+
+  function renderTable() {
+    const tbody = document.getElementById('tbl-body');
+    document.getElementById('count-badge').textContent = `${data.length} entri`;
+    if (!data.length) {
+      tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><i class="ti ti-inbox"></i>Belum ada data. Tambahkan dulu!</div></td></tr>`;
+      return;
+    }
+    tbody.innerHTML = data.map((d, i) => `
+      <tr>
+        <td style="color:#999;font-size:12px">${i + 1}</td>
+        <td>
+          <div class="name-cell">
+            <div class="avatar">${initials(d.nama)}</div>
+            <span class="name-text">${d.nama}</span>
+          </div>
+        </td>
+        <td>${fmtDate(d.tgl)}</td>
+        <td>${calcAge(d.tgl)} th</td>
+        <td style="color:#2563eb">${d.email}</td>
+        <td><span class="gender-badge ${d.gender === 'Laki-laki' ? 'laki' : 'perempuan'}">${d.gender}</span></td>
+        <td><div class="motivasi">"${d.motivasi}"</div></td>
+        <td>
+          <button class="btn-del" onclick="deleteRow(${d.id})" title="Hapus">
+            <i class="ti ti-trash"></i>
+          </button>
+        </td>
+      </tr>
+    `).join('');
+  }
+</script>
+</body>
+</html>

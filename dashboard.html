@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>CRUD Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+/* ============================================================
+   ROOT VARIABLES & THEME
+   ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap');
+
+:root {
+  --primary: #2c7be5;
+  --primary-dim: #1a5ab5;
+  --bg: #f0f2f7;
+  --bg2: #e4e8f0;
+  --card: #ffffff;
+  --card2: #f7f9fc;
+  --text: #0d1117;
+  --text-muted: #5a6580;
+  --border: #d0d7e3;
+  --danger: #e03c52;
+  --success: #1db97a;
+  --shadow: 0 2px 12px rgba(0,0,0,0.08);
+  --radius: 12px;
+  --mono: 'DM Mono', monospace;
+  --sans: 'Syne', sans-serif;
+}
+
+body.dark {
+  --bg: #0c0e14;
+  --bg2: #12141c;
+  --card: #171921;
+  --card2: #1e2130;
+  --text: #e8ecf4;
+  --text-muted: #6e7a99;
+  --border: #2a2f42;
+  --shadow: 0 2px 16px rgba(0,0,0,0.4);
+}
+
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  transition: background 0.3s, color 0.3s;
+}
+
+.hidden { display: none !important; }
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+.wrap {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 32px 20px;
+}
+
+/* ============================================================
+   AUTH SCREEN
+   ============================================================ */
+#auth {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+.auth-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 40px 36px;
+  width: 100%;
+  max-width: 400px;
+  animation: slideUp 0.4s ease;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.auth-card h2 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-bottom: 6px;
+}
+
+.auth-card .sub {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-family: var(--mono);
+  margin-bottom: 28px;
+}
+
+.auth-link {
+  text-align: center;
+  margin-top: 18px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.auth-link a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/* ============================================================
+   FORM ELEMENTS
+   ============================================================ */
+.field {
+  margin-bottom: 14px;
+}
+
+.field label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-family: var(--mono);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+}
+
+.field input,
+.field select {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--bg2);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.field input:focus,
+.field select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 20%, transparent);
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 8px;
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: transform 0.12s, opacity 0.15s;
+  white-space: nowrap;
+}
+
+.btn:active { transform: scale(0.97); }
+
+.btn-primary  { background: var(--primary); color: #fff; }
+.btn-primary:hover { opacity: 0.88; }
+
+.btn-secondary { background: var(--bg2); color: var(--text); border: 1.5px solid var(--border); }
+.btn-secondary:hover { border-color: var(--primary); color: var(--primary); }
+
+.btn-danger   { background: var(--danger); color: #fff; }
+.btn-danger:hover { opacity: 0.85; }
+
+.btn-success  { background: var(--success); color: #fff; }
+.btn-success:hover { opacity: 0.85; }
+
+.btn-full { width: 100%; }
+.btn-sm   { padding: 6px 12px; font-size: 0.78rem; border-radius: 6px; }
+
+/* ============================================================
+   CARD
+   ============================================================ */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 24px;
+  margin-bottom: 20px;
+  animation: fadeIn 0.35s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.card-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.card-badge {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  padding: 3px 10px;
+  border-radius: 99px;
+  background: color-mix(in srgb, var(--primary) 15%, transparent);
+  color: var(--primary);
+  font-weight: 500;
+}
+
+/* ============================================================
+   TOPBAR
+   ============================================================ */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 22px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.topbar-brand {
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.topbar-brand span {
+  color: var(--primary);
+}
+
+.topbar-user {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.topbar-user strong {
+  color: var(--text);
+}
+
+.topbar-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* ============================================================
+   TABLE
+   ============================================================ */
+.table-wrap {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+thead {
+  background: var(--bg2);
+}
+
+th {
+  padding: 10px 14px;
+  text-align: left;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  font-weight: 500;
+  border-bottom: 1px solid var(--border);
+}
+
+td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+tr:last-child td { border-bottom: none; }
+
+tbody tr {
+  transition: background 0.15s;
+}
+
+tbody tr:hover { background: var(--card2); }
+
+.td-actions {
+  display: flex;
+  gap: 6px;
+}
+
+/* ============================================================
+   THEME PICKER
+   ============================================================ */
+.theme-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.color-swatch {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.15s, border-color 0.2s;
+  overflow: hidden;
+}
+
+.color-swatch:hover { transform: scale(1.12); border-color: var(--primary); }
+
+input[type="color"] {
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 50%;
+  padding: 0;
+  cursor: pointer;
+  background: none;
+  overflow: hidden;
+}
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+#toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%) translateY(60px);
+  background: var(--text);
+  color: var(--bg);
+  padding: 10px 22px;
+  border-radius: 99px;
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0;
+  transition: transform 0.3s, opacity 0.3s;
+}
+
+#toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+.empty {
+  text-align: center;
+  padding: 36px 20px;
+  color: var(--text-muted);
+  font-family: var(--mono);
+  font-size: 0.85rem;
+}
+
+/* ============================================================
+   ADMIN BADGE
+   ============================================================ */
+.role-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 99px;
+  font-size: 0.7rem;
+  font-family: var(--mono);
+  font-weight: 500;
+}
+
+.role-admin { background: color-mix(in srgb, #e0a900 15%, transparent); color: #c08800; }
+.role-user  { background: color-mix(in srgb, var(--primary) 15%, transparent); color: var(--primary); }
+
+/* ============================================================
+   FORM GRID
+   ============================================================ */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.form-grid .field-full { grid-column: 1 / -1; }
+
+@media (max-width: 600px) {
+  .form-grid { grid-template-columns: 1fr; }
+  .form-grid .field-full { grid-column: 1; }
+}
+
+/* ============================================================
+   STATS ROW
+   ============================================================ */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  box-shadow: var(--shadow);
+}
+
+.stat-label {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.stat-value {
+  font-size: 1.7rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--primary);
+}
+</style>
+</head>
+
+<body>
+
+<!-- ============================================================
+     TOAST NOTIFICATION
+     ============================================================ -->
+<div id="toast"></div>
+
+<!-- ============================================================
+     AUTH: LOGIN & REGISTER
+     ============================================================ -->
+<div id="auth">
+
+  <!-- LOGIN -->
+  <div class="auth-card" id="loginBox">
+    <h2>Selamat Datang</h2>
+    <p class="sub">// masuk ke akun anda</p>
+
+    <div class="field">
+      <label>Username</label>
+      <input id="loginUser" placeholder="username anda" autocomplete="username">
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input id="loginPass" type="password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn btn-primary btn-full" onclick="login()">Login →</button>
+    <p class="auth-link">Belum punya akun? <a href="#" onclick="toggleAuth()">Daftar sekarang</a></p>
+  </div>
+
+  <!-- REGISTER -->
+  <div class="auth-card hidden" id="registerBox">
+    <h2>Buat Akun</h2>
+    <p class="sub">// daftar sebagai user atau admin</p>
+
+    <div class="field">
+      <label>Username <span style="color:var(--text-muted);">(min 4 karakter)</span></label>
+      <input id="regUser" placeholder="pilih username unik" autocomplete="username">
+    </div>
+    <div class="field">
+      <label>Password <span style="color:var(--text-muted);">(min 5 karakter)</span></label>
+      <input id="regPass" type="password" placeholder="••••••••" autocomplete="new-password">
+    </div>
+    <div class="field">
+      <label>Role</label>
+      <select id="regRole">
+        <option value="user">User</option>
+        <option value="admin">Admin</option>
+      </select>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="register()">Daftar Sekarang →</button>
+    <button class="btn btn-secondary btn-full" style="margin-top:8px" onclick="toggleAuth()">← Kembali ke Login</button>
+  </div>
+
+</div>
+
+<!-- ============================================================
+     USER DASHBOARD
+     ============================================================ -->
+<div id="userDash" class="hidden">
+  <div class="wrap">
+
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="topbar-brand">CRUD<span>.</span>dash</div>
+      <div class="topbar-user">logged in as <strong id="uName"></strong> <span class="role-badge role-user">user</span></div>
+      <div class="topbar-actions">
+        <button class="btn btn-secondary btn-sm" onclick="toggleDark()" id="darkBtn">🌙 Dark</button>
+        <button class="btn btn-secondary btn-sm" onclick="logout()">Logout</button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row" id="userStats"></div>
+
+    <!-- Theme Settings -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">🎨 Pengaturan Tema</span>
+      </div>
+      <div class="theme-row">
+        <input type="color" id="colorPicker" title="Pilih warna" oninput="previewTheme(this.value)">
+        <!-- Preset swatches -->
+        <div class="color-swatch" style="background:#2c7be5" onclick="applyPreset('#2c7be5')" title="Ocean Blue"></div>
+        <div class="color-swatch" style="background:#7c3aed" onclick="applyPreset('#7c3aed')" title="Violet"></div>
+        <div class="color-swatch" style="background:#e03c52" onclick="applyPreset('#e03c52')" title="Crimson"></div>
+        <div class="color-swatch" style="background:#1db97a" onclick="applyPreset('#1db97a')" title="Emerald"></div>
+        <div class="color-swatch" style="background:#e08c0a" onclick="applyPreset('#e08c0a')" title="Amber"></div>
+        <div class="color-swatch" style="background:#0e9ac8" onclick="applyPreset('#0e9ac8')" title="Cyan"></div>
+        <button class="btn btn-primary btn-sm" onclick="saveTheme()">Simpan</button>
+        <button class="btn btn-secondary btn-sm" onclick="resetTheme()">Reset</button>
+      </div>
+    </div>
+
+    <!-- Biodata Form -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">📝 <span id="formTitle">Tambah Biodata</span></span>
+        <span class="card-badge" id="editBadge" style="display:none">mode edit</span>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Nama <span style="color:var(--text-muted)">(huruf & spasi)</span></label>
+          <input id="fNama" placeholder="contoh: Budi Santoso">
+        </div>
+        <div class="field">
+          <label>Umur <span style="color:var(--text-muted)">(1–120)</span></label>
+          <input id="fUmur" type="number" placeholder="25" min="1" max="120">
+        </div>
+        <div class="field field-full">
+          <label>Alamat <span style="color:var(--text-muted)">(min 5 karakter)</span></label>
+          <input id="fAlamat" placeholder="Jl. Contoh No. 123, Kota">
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-success" id="saveBtn" onclick="saveData()">Simpan Data</button>
+        <button class="btn btn-secondary hidden" id="cancelBtn" onclick="cancelEdit()">Batal Edit</button>
+      </div>
+    </div>
+
+    <!-- Biodata Table -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">📋 Data Biodata</span>
+      </div>
+      <div id="userTableWrap"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================
+     ADMIN DASHBOARD
+     ============================================================ -->
+<div id="adminDash" class="hidden">
+  <div class="wrap">
+
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="topbar-brand">CRUD<span>.</span>admin</div>
+      <div class="topbar-user">logged in as <strong id="aName"></strong> <span class="role-badge role-admin">admin</span></div>
+      <div class="topbar-actions">
+        <button class="btn btn-secondary btn-sm" onclick="toggleDark()" id="darkBtnAdmin">🌙 Dark</button>
+        <button class="btn btn-secondary btn-sm" onclick="logout()">Logout</button>
+      </div>
+    </div>
+
+    <!-- Admin Stats -->
+    <div class="stats-row" id="adminStats"></div>
+
+    <!-- All User Data Table -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">👥 Semua Data Pengguna</span>
+        <span class="card-badge">read-only</span>
+      </div>
+      <div id="adminTableWrap"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script>
+/* ==============================================================
+   CONSTANTS
+   ============================================================== */
+const DEFAULT_COLOR = "#2c7be5";
+
+// Track edit mode: null = tambah baru, angka = index yang diedit
+let editIndex = null;
+
+// Preview warna sebelum disimpan
+let previewColor = null;
+
+/* ==============================================================
+   LOCALSTORAGE HELPERS
+   ============================================================== */
+/** Ambil semua user dari localStorage */
+function getUsers() {
+  return JSON.parse(localStorage.getItem("users")) || [];
+}
+
+/** Simpan array users ke localStorage */
+function saveUsers(data) {
+  localStorage.setItem("users", JSON.stringify(data));
+}
+
+/** Ambil session aktif */
+function getSession() {
+  return JSON.parse(localStorage.getItem("session"));
+}
+
+/** Simpan session aktif */
+function saveSession(user) {
+  localStorage.setItem("session", JSON.stringify(user));
+}
+
+/* ==============================================================
+   TOAST NOTIFICATION
+   ============================================================== */
+function toast(msg, duration = 2400) {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  setTimeout(() => el.classList.remove("show"), duration);
+}
+
+/* ==============================================================
+   AUTH: TOGGLE FORM
+   ============================================================== */
+function toggleAuth() {
+  document.getElementById("loginBox").classList.toggle("hidden");
+  document.getElementById("registerBox").classList.toggle("hidden");
+}
+
+/* ==============================================================
+   AUTH: REGISTER
+   ============================================================== */
+function register() {
+  const u = document.getElementById("regUser").value.trim();
+  const p = document.getElementById("regPass").value.trim();
+  const r = document.getElementById("regRole").value;
+
+  // Validasi panjang
+  if (u.length < 4) return toast("❌ Username minimal 4 karakter");
+  if (p.length < 5) return toast("❌ Password minimal 5 karakter");
+
+  const users = getUsers();
+
+  // Cek duplikat username
+  if (users.find(x => x.username === u)) return toast("❌ Username sudah digunakan");
+
+  // Buat user baru
+  users.push({
+    username: u,
+    password: p,      // CATATAN: plain-text — hanya untuk demo lokal!
+    role: r,
+    themeColor: DEFAULT_COLOR,
+    darkMode: false,
+    biodata: []       // array objek { nama, umur, alamat }
+  });
+
+  saveUsers(users);
+  toast("✅ Berhasil daftar, silakan login");
+  toggleAuth();
+}
+
+/* ==============================================================
+   AUTH: LOGIN
+   ============================================================== */
+function login() {
+  const u = document.getElementById("loginUser").value.trim();
+  const p = document.getElementById("loginPass").value.trim();
+
+  const user = getUsers().find(x => x.username === u && x.password === p);
+  if (!user) return toast("❌ Username atau password salah");
+
+  saveSession(user);
+  location.reload();
+}
+
+/* ==============================================================
+   AUTH: LOGOUT
+   ============================================================== */
+function logout() {
+  localStorage.removeItem("session");
+  location.reload();
+}
+
+/* ==============================================================
+   CRUD: SIMPAN DATA (tambah / update)
+   ============================================================== */
+function saveData() {
+  const nama   = document.getElementById("fNama").value.trim();
+  const umur   = parseInt(document.getElementById("fUmur").value);
+  const alamat = document.getElementById("fAlamat").value.trim();
+
+  // Validasi
+  if (!/^[A-Za-z\s]+$/.test(nama))    return toast("❌ Nama hanya boleh huruf dan spasi");
+  if (!umur || umur < 1 || umur > 120) return toast("❌ Umur harus antara 1–120");
+  if (alamat.length < 5)              return toast("❌ Alamat minimal 5 karakter");
+
+  const session = getSession();
+  const users = getUsers();
+  const u = users.find(x => x.username === session.username);
+
+  const entry = { nama, umur, alamat };
+
+  if (editIndex !== null) {
+    // Mode update: ganti data di index yang diedit
+    u.biodata[editIndex] = entry;
+    toast("✏️ Data berhasil diperbarui");
+  } else {
+    // Mode tambah: push ke array
+    u.biodata.push(entry);
+    toast("✅ Data berhasil ditambahkan");
+  }
+
+  saveUsers(users);
+  cancelEdit();      // reset form
+  renderUser();
+}
+
+/* ==============================================================
+   CRUD: MULAI EDIT
+   ============================================================== */
+function startEdit(i) {
+  const session = getSession();
+  const u = getUsers().find(x => x.username === session.username);
+
+  // Isi form dengan data yang dipilih
+  document.getElementById("fNama").value   = u.biodata[i].nama;
+  document.getElementById("fUmur").value   = u.biodata[i].umur;
+  document.getElementById("fAlamat").value = u.biodata[i].alamat;
+
+  editIndex = i;
+  document.getElementById("formTitle").textContent = "Edit Biodata";
+  document.getElementById("editBadge").style.display = "inline";
+  document.getElementById("saveBtn").textContent = "Update Data";
+  document.getElementById("cancelBtn").classList.remove("hidden");
+
+  // Scroll ke form
+  document.getElementById("fNama").focus();
+  document.getElementById("fNama").scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+/* ==============================================================
+   CRUD: BATAL EDIT
+   ============================================================== */
+function cancelEdit() {
+  editIndex = null;
+  document.getElementById("fNama").value   = "";
+  document.getElementById("fUmur").value   = "";
+  document.getElementById("fAlamat").value = "";
+  document.getElementById("formTitle").textContent = "Tambah Biodata";
+  document.getElementById("editBadge").style.display = "none";
+  document.getElementById("saveBtn").textContent = "Simpan Data";
+  document.getElementById("cancelBtn").classList.add("hidden");
+}
+
+/* ==============================================================
+   CRUD: HAPUS DATA
+   ============================================================== */
+function deleteData(i) {
+  if (!confirm("Yakin ingin menghapus data ini?")) return;
+
+  const session = getSession();
+  const users = getUsers();
+  const u = users.find(x => x.username === session.username);
+
+  u.biodata.splice(i, 1);
+  saveUsers(users);
+  cancelEdit();
+  renderUser();
+  toast("🗑️ Data berhasil dihapus");
+}
+
+/* ==============================================================
+   RENDER: USER TABLE
+   ============================================================== */
+function renderUser() {
+  const session = getSession();
+  const u = getUsers().find(x => x.username === session.username);
+  const wrap = document.getElementById("userTableWrap");
+
+  if (!u.biodata.length) {
+    wrap.innerHTML = '<div class="empty">Belum ada data. Tambahkan biodata pertama Anda ↑</div>';
+    renderUserStats(u);
+    return;
+  }
+
+  let rows = "";
+  u.biodata.forEach((d, i) => {
+    rows += `
+      <tr>
+        <td><strong>${escHtml(d.nama)}</strong></td>
+        <td>${d.umur} thn</td>
+        <td>${escHtml(d.alamat)}</td>
+        <td>
+          <div class="td-actions">
+            <button class="btn btn-secondary btn-sm" onclick="startEdit(${i})">✏️ Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteData(${i})">🗑️ Hapus</button>
+          </div>
+        </td>
+      </tr>`;
+  });
+
+  wrap.innerHTML = `
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Nama</th><th>Umur</th><th>Alamat</th><th>Aksi</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+
+  renderUserStats(u);
+}
+
+/* ==============================================================
+   RENDER: USER STATS
+   ============================================================== */
+function renderUserStats(u) {
+  const avgUmur = u.biodata.length
+    ? Math.round(u.biodata.reduce((s, d) => s + parseInt(d.umur), 0) / u.biodata.length)
+    : 0;
+
+  document.getElementById("userStats").innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">Total Biodata</div>
+      <div class="stat-value">${u.biodata.length}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Rata-rata Umur</div>
+      <div class="stat-value">${avgUmur || "—"}</div>
+    </div>`;
+}
+
+/* ==============================================================
+   RENDER: ADMIN TABLE
+   ============================================================== */
+function renderAdmin() {
+  const users = getUsers();
+  const statsEl = document.getElementById("adminStats");
+  const wrap = document.getElementById("adminTableWrap");
+
+  const totalUsers    = users.length;
+  const totalBiodata  = users.reduce((s, u) => s + u.biodata.length, 0);
+
+  statsEl.innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">Total User</div>
+      <div class="stat-value">${totalUsers}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total Biodata</div>
+      <div class="stat-value">${totalBiodata}</div>
+    </div>`;
+
+  if (!totalBiodata) {
+    wrap.innerHTML = '<div class="empty">Belum ada data biodata dari semua pengguna.</div>';
+    return;
+  }
+
+  let rows = "";
+  users.forEach(u => {
+    if (!u.biodata.length) return;
+    u.biodata.forEach(d => {
+      rows += `
+        <tr>
+          <td>
+            <code style="font-size:0.8rem;background:var(--bg2);padding:2px 6px;border-radius:4px">
+              ${escHtml(u.username)}
+            </code>
+          </td>
+          <td><span class="role-badge role-${u.role}">${u.role}</span></td>
+          <td>${escHtml(d.nama)}</td>
+          <td>${d.umur} thn</td>
+          <td>${escHtml(d.alamat)}</td>
+        </tr>`;
+    });
+  });
+
+  wrap.innerHTML = `
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Username</th><th>Role</th><th>Nama</th><th>Umur</th><th>Alamat</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+}
+
+/* ==============================================================
+   TEMA: PREVIEW (belum disimpan)
+   ============================================================== */
+function previewTheme(color) {
+  previewColor = color;
+  document.documentElement.style.setProperty("--primary", color);
+}
+
+/* ==============================================================
+   TEMA: PRESET SWATCH
+   ============================================================== */
+function applyPreset(color) {
+  previewColor = color;
+  document.getElementById("colorPicker").value = color;
+  previewTheme(color);
+}
+
+/* ==============================================================
+   TEMA: SIMPAN WARNA
+   ============================================================== */
+function saveTheme() {
+  const color = previewColor || DEFAULT_COLOR;
+  const session = getSession();
+  const users = getUsers();
+  const u = users.find(x => x.username === session.username);
+  u.themeColor = color;
+  saveUsers(users);
+  saveSession(u);
+  toast("🎨 Tema tersimpan");
+}
+
+/* ==============================================================
+   TEMA: RESET DEFAULT
+   ============================================================== */
+function resetTheme() {
+  const session = getSession();
+  const users = getUsers();
+  const u = users.find(x => x.username === session.username);
+  u.themeColor = DEFAULT_COLOR;
+  u.darkMode = false;
+  saveUsers(users);
+  saveSession(u);
+  location.reload();
+}
+
+/* ==============================================================
+   TEMA: TOGGLE DARK MODE
+   ============================================================== */
+function toggleDark() {
+  document.body.classList.toggle("dark");
+  const isDark = document.body.classList.contains("dark");
+
+  // Update teks tombol
+  const btn1 = document.getElementById("darkBtn");
+  const btn2 = document.getElementById("darkBtnAdmin");
+  const label = isDark ? "☀️ Light" : "🌙 Dark";
+  if (btn1) btn1.textContent = label;
+  if (btn2) btn2.textContent = label;
+
+  // Simpan preferensi ke localStorage
+  const session = getSession();
+  const users = getUsers();
+  const u = users.find(x => x.username === session.username);
+  u.darkMode = isDark;
+  saveUsers(users);
+  saveSession(u);
+}
+
+/* ==============================================================
+   SECURITY HELPER: escape HTML untuk mencegah XSS
+   ============================================================== */
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+/* ==============================================================
+   SESSION CHECK & INIT
+   ============================================================== */
+(function init() {
+  const session = getSession();
+  if (!session) return; // tampilkan halaman auth
+
+  // Sembunyikan auth, terapkan preferensi tema
+  document.getElementById("auth").classList.add("hidden");
+  document.documentElement.style.setProperty("--primary", session.themeColor || DEFAULT_COLOR);
+  if (session.darkMode) {
+    document.body.classList.add("dark");
+  }
+
+  if (session.role === "admin") {
+    // === ADMIN ===
+    document.getElementById("adminDash").classList.remove("hidden");
+    document.getElementById("aName").textContent = session.username;
+    if (session.darkMode) document.getElementById("darkBtnAdmin").textContent = "☀️ Light";
+    renderAdmin();
+  } else {
+    // === USER ===
+    document.getElementById("userDash").classList.remove("hidden");
+    document.getElementById("uName").textContent = session.username;
+    if (session.darkMode) document.getElementById("darkBtn").textContent = "☀️ Light";
+    // Sinkronisasi color picker dengan warna tersimpan
+    document.getElementById("colorPicker").value = session.themeColor || DEFAULT_COLOR;
+    renderUser();
+  }
+})();
+</script>
+</body>
+</html>
